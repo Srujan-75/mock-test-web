@@ -11,51 +11,30 @@
 <body>
 
 <h1>Mock Test Platform</h1>
+<select id="topicSelect" onchange="loadTopic()">
+  <option value="">-- Select Topic --</option>
+  <option value="SVD">SVD</option>
+  <option value="MIMO">MIMO</option>
+</select>
 
 <div id="quiz"></div>
 
 <button onclick="submitTest()">Submit Test</button>
 
 <h2 id="result"></h2>
+<script src="questions.js"></script>
 
 <script>
-const questions = [
-  {
-    question: "What does SVD stand for?",
-    options: [
-      "Singular Value Decomposition",
-      "System Vector Division",
-      "Signal Variance Detector",
-      "None"
-    ],
-    correct: 0,
-    explanation: "SVD stands for Singular Value Decomposition. It factorizes a matrix into U, Σ, and Vᵀ."
-  },
-  {
-    question: "In SVD, which matrix contains singular values?",
-    options: [
-      "U",
-      "V",
-      "Σ",
-      "A"
-    ],
-    correct: 2,
-    explanation: "The diagonal matrix Σ contains the singular values."
-  },
-  {
-    question: "SVD is mainly used in communication systems for?",
-    options: [
-      "Noise generation",
-      "Channel diagonalization",
-      "Modulation",
-      "Sampling"
-    ],
-    correct: 1,
-    explanation: "SVD helps diagonalize MIMO channels into parallel independent channels."
-  }
-];
+let questions = [];
+function loadTopic() {
+  const topic = document.getElementById("topicSelect").value;
+  if (!topic) return;
+  questions = questionBank[topic];
+  loadQuiz();
+}
 
 function loadQuiz() {
+  
   const quizDiv = document.getElementById("quiz");
   quizDiv.innerHTML = "";
   questions.forEach((q, index) => {
