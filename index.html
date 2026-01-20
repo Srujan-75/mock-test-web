@@ -55,6 +55,44 @@ const questions = [
   }
 ];
 
+function loadQuiz() {
+  const quizDiv = document.getElementById("quiz");
+  quizDiv.innerHTML = "";
+  questions.forEach((q, index) => {
+    quizDiv.innerHTML += `
+      <div class="question">
+        <p>${index + 1}. ${q.question}</p>
+        ${q.options.map((opt, i) =>
+          `<label>
+            <input type="radio" name="q${index}" value="${i}">
+            ${opt}
+          </label><br>`
+        ).join("")}
+        <p id="exp${index}" style="display:none; color: green;"></p>
+      </div>
+    `;
+  });
+}
+
+function submitTest() {
+  let score = 0;
+  questions.forEach((q, index) => {
+    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    const exp = document.getElementById(`exp${index}`);
+    if (selected && Number(selected.value) === q.correct) {
+      score++;
+      exp.innerText = "✔ Correct. " + q.explanation;
+    } else {
+      exp.innerText = "✘ Wrong. Correct answer: " + q.options[q.correct] + ". " + q.explanation;
+    }
+    exp.style.display = "block";
+  });
+  document.getElementById("result").innerText =
+    `Score: ${score} / ${questions.length}`;
+}
+
+loadQuiz();
+  
 </script>
 
 
