@@ -40,6 +40,14 @@ label {
   display: block;
   margin: 8px 0;
 }
+
+select {
+  display: block;
+  margin: 20px auto;
+  padding: 8px;
+  font-size: 16px;
+}
+
 </style>
 </head>
 <body>
@@ -76,6 +84,7 @@ function startTest() {
 
   document.getElementById("quizBox").style.display = "block";
   document.getElementById("result").innerText = "";
+document.querySelector("button").disabled = false;
 
   showQuestion();
 }
@@ -87,6 +96,9 @@ function showQuestion() {
 
   const optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML = "";
+
+  document.querySelectorAll('input[name="option"]').forEach(r => r.checked = false);
+
 
   q.options.forEach((opt, i) => {
     optionsDiv.innerHTML += `
@@ -123,6 +135,8 @@ function finishTest() {
   document.getElementById("quizBox").style.display = "none";
   document.getElementById("result").innerText =
     `Test Completed! Score: ${score} / ${questions.length}`;
+  document.querySelector("button").disabled = true;
+
 }
 </script>
 
