@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mock Test Platform</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .question { margin-bottom: 20px; }
+    button { padding: 10px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>Mock Test Platform</h1>
+
+<div id="quiz"></div>
+
+<button onclick="submitTest()">Submit Test</button>
+
+<h2 id="result"></h2>
+
+<script>
+const questions = [
+  {
+    question: "What does SVD stand for?",
+    options: [
+      "Singular Value Decomposition",
+      "System Vector Division",
+      "Signal Variance Detector",
+      "None"
+    ],
+    correct: 0,
+    explanation: "SVD stands for Singular Value Decomposition."
+  }
+];
+
+function loadQuiz() {
+  const quizDiv = document.getElementById("quiz");
+  questions.forEach((q, index) => {
+    quizDiv.innerHTML += `
+      <div class="question">
+        <p>${index+1}. ${q.question}</p>
+        ${q.options.map((opt, i) =>
+          `<label>
+            <input type="radio" name="q${index}" value="${i}">
+            ${opt}
+          </label><br>`
+        ).join("")}
+      </div>
+    `;
+  });
+}
+
+function submitTest() {
+  let score = 0;
+  questions.forEach((q, index) => {
+    const selected = document.querySelector(`input[name="q${index}"]:checked`);
+    if (selected && Number(selected.value) === q.correct) {
+      score++;
+    }
+  });
+  document.getElementById("result").innerText =
+    `Score: ${score} / ${questions.length}`;
+}
+
+loadQuiz();
+</script>
+
+</body>
+</html>
