@@ -11,69 +11,126 @@
 <body>
 
 <h1>Mock Test Platform</h1>
-<select id="topicSelect" onchange="loadTopic()">
+
+<select id="topicSelect" onchange="startTest()">
   <option value="">-- Select Topic --</option>
   <option value="SVD">SVD</option>
   <option value="MIMO">MIMO</option>
 </select>
 
-<div id="quiz"></div>
-
-<button onclick="submitTest()">Submit Test</button>
+<div id="quizBox" style="display:none; margin-top:20px;">
+  <h3 id="questionText"></h3>
+  <div id="options"></div>
+  <button onclick="nextQuestion()">Next</button>
+</div>
 
 <h2 id="result"></h2>
-<script src="questions.js"></script>
 
+<script src="questions.js"></script>
 <script>
 let questions = [];
-function loadTopic() {
+let currentIndex = 0;
+let score = 0;
+
+function startTest() {
   const topic = document.getElementById("topicSelect").value;
   if (!topic) return;
+
   questions = questionBank[topic];
-  loadQuiz();
+  currentIndex = 0;
+  score = 0;
+
+  document.getElementById("quizBox").style.display = "block";
+  document.getElementById("result").innerText = "";
+
+  showQuestion();
 }
 
-function loadQuiz() {
-  
-  const quizDiv = document.getElementById("quiz");
-  quizDiv.innerHTML = "";
-  questions.forEach((q, index) => {
-    quizDiv.innerHTML += `
-      <div class="question">
-        <p>${index + 1}. ${q.question}</p>
-        ${q.options.map((opt, i) =>
-          `<label>
-            <input type="radio" name="q${index}" value="${i}">
-            ${opt}
-          </label><br>`
-        ).join("")}
-        <p id="exp${index}" style="display:none; color: green;"></p>
-      </div>
+function showQuestion() {
+  const q = questions[currentIndex];
+  document.getElementById("questionText").innerText =
+    `${currentIndex + 1}. ${q.question}`;
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  q.options.forEach((opt, i) => {
+    optionsDiv.innerHTML += `
+      <label>
+        <input type="radio" name="option" value="${i}">
+        ${opt}
+      </label><br>
     `;
   });
 }
 
-function submitTest() {
-  let score = 0;
-  questions.forEach((q, index) => {
-    const selected = document.querySelector(`input[name="q${index}"]:checked`);
-    const exp = document.getElementById(`exp${index}`);
-    if (selected && Number(selected.value) === q.correct) {
-      score++;
-      exp.innerText = "✔ Correct. " + q.explanation;
-    } else {
-      exp.innerText = "✘ Wrong. Correct answer: " + q.options[q.correct] + ". " + q.explanation;
-    }
-    exp.style.display = "block";
-  });
-  document.getElementById("result").innerText =
-    `Score: ${score} / ${questions.length}`;
+function nextQuestion() {
+  const selected = document.querySelector('input[name="option"]:checked');
+
+  if (!selected) {
+    alert("Please select an answer");
+    return;
+  }
+
+  if (Number(selected.value) === questions[currentIndex].correct) {
+    score++;
+  }
+
+  currentIndex++;
+
+  if (currentIndex < questions.length) {
+    showQuestion();
+  } else {
+    finishTest();
+  }
 }
 
-loadQuiz();
-  
+function finishTest() {
+  document.getElementById("quizBox").style.display = "none";
+  document.getElementById("result").innerText =
+    `Test Completed! Score: ${score} / ${questions.length}`;
+}
 </script>
 
-
 </body>
+  <style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 30px;
+}
+
+h1 {
+  text-align: center;
+}
+
+#quizBox {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+  margin: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+label {
+  display: block;
+  margin: 8px 0;
+}
+</style>
+
 </html>
