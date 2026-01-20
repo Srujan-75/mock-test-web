@@ -5,9 +5,22 @@
    <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  padding: 30px;
+  margin: 0;
+  padding: 0;
+  background-image: url("nature.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: -1;
+}
+
 
 h1 {
   text-align: center;
@@ -48,28 +61,249 @@ select {
   font-size: 16px;
 }
 
+/* 🌿 Intro Screen */
+#introScreen {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.introCard {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.studentImg {
+  width: 150px;
+  margin-bottom: 15px;
+}
+
+.introCard h2 {
+  margin-bottom: 10px;
+}
+
+.introCard p {
+  font-size: 15px;
+  color: #333;
+}
+
+blockquote {
+  font-style: italic;
+  margin: 15px 0;
+  color: #2c3e50;
+}
+
+blockquote span {
+  font-size: 13px;
+  color: #555;
+}
+
+#siteContent {
+  min-height: 100vh;
+  padding: 30px;
+}
+
+/* 🔐 Password Screen */
+#passwordScreen {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#passwordScreen input {
+  padding: 10px;
+  width: 220px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  outline: none;
+  text-align: center;
+}
+
+.hiddenScreen {
+  display: none !important;
+}
+
+#palette {
+  width: 160px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  align-content: start;
+}
+
+.palette-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: bold;
+  border: 1px solid #999;
+  cursor: pointer;
+  background: #fff;
+  border-radius: 4px;
+}
+.palette-current {
+  border: 2px solid #007bff;
+}
+
+
+
+.palette-answered {
+  background: #4caf50;
+  color: white;
+}
+
+.palette-seen {
+  background: #f44336;
+  color: white;
+}
+
+/* 🎯 Result Card */
+#resultCard {
+  background: rgba(255, 255, 255, 0.95);
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+/* 🔵 Score Circle */
+.score-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+}
+
+.score-good {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.score-average {
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+}
+
+.score-poor {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+/* 📖 Verse */
+.verse {
+  margin-top: 20px;
+  font-style: italic;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.verse span {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #555;
+}
+
 </style>
 </head>
 <body>
 
-<h1>Mock Test Platform</h1>
+<div id="introScreen">
+  <div class="introCard">
+    <img src="student.png" alt="Student" class="studentImg">
+
+    <h2>Hi! Welcome 👋</h2>
+
+    <p>
+      I’m here to help you test your knowledge and grow step by step.
+      Take a deep breath, focus, and give your best!
+    </p>
+
+    <blockquote>
+      “The mind of the prudent acquires knowledge,
+      and the ear of the wise seeks knowledge.”
+      <br><span>— Proverbs 18:15</span>
+    </blockquote>
+
+    <button onclick="enterSite()">Start Test</button>
+  </div>
+</div>
+
+<div id="passwordScreen" class="hiddenScreen">
+
+  <div class="introCard">
+    <h2>Enter Access Password</h2>
+
+    <p style="margin-bottom:15px;">
+      This test is intended for authorized students only.
+    </p>
+
+    <input type="password" id="passwordInput" placeholder="Password">
+
+    <br><br>
+
+    <button onclick="checkPassword()">Continue</button>
+
+    <p id="passwordError" style="color:red; margin-top:10px;"></p>
+  </div>
+</div>
+
+<div id="siteContent" style="display:none;">
+
+<div class="introCard" style="max-width:900px; margin:auto;">
+<h1>Test Platform</h1>
 
 <select id="topicSelect" onchange="startTest()">
-  <option value="">-- Select Topic --</option>
+  <option value="" selected disabled>-- Select Topic --</option>
   <option value="SVD">SVD</option>
   <option value="MIMO">MIMO</option>
 </select>
 
-<div id="quizBox" style="display:none; margin-top:20px;">
-  <h3 id="questionText"></h3>
-  <div id="options"></div>
-  <button onclick="nextQuestion()">Next</button>
+
+<div style="display:flex; gap:20px; justify-content:center;">
+
+  <!-- Question Area -->
+  <div id="quizBox" style="display:none; margin-top:20px;">
+    <h3 id="questionText"></h3>
+    <div id="options"></div>
+    <button onclick="nextQuestion()">Next</button>
+  </div>
+
+  <!-- Question Palette -->
+  <div id="palette"></div>
+
+</div>
 </div>
 
-<h2 id="result"></h2>
 
+  <div id="resultCard" style="display:none;">
+  <h2>Test Result</h2>
+
+  <div id="scoreCircle" class="score-circle"></div>
+
+  <div id="bibleVerse" class="verse"></div>
+</div>
+
+</div>
 <script src="questions.js"></script>
 <script>
+
+let answers = [];       // stores selected option index or null
+let visited = [];       // true if question was opened
+
 let questions = [];
 let currentIndex = 0;
 let score = 0;
@@ -82,14 +316,19 @@ function startTest() {
   currentIndex = 0;
   score = 0;
 
-  document.getElementById("quizBox").style.display = "block";
-  document.getElementById("result").innerText = "";
-document.querySelector("button").disabled = false;
+  answers = new Array(questions.length).fill(null);
+  visited = new Array(questions.length).fill(false);
 
+  document.getElementById("quizBox").style.display = "block";
+ 
+
+  buildPalette();
   showQuestion();
 }
 
 function showQuestion() {
+  visited[currentIndex] = true;
+
   const q = questions[currentIndex];
   document.getElementById("questionText").innerText =
     `${currentIndex + 1}. ${q.question}`;
@@ -97,18 +336,41 @@ function showQuestion() {
   const optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML = "";
 
-  document.querySelectorAll('input[name="option"]').forEach(r => r.checked = false);
-
-
   q.options.forEach((opt, i) => {
+    const checked = answers[currentIndex] === i ? "checked" : "";
     optionsDiv.innerHTML += `
       <label>
-        <input type="radio" name="option" value="${i}">
+        <input type="radio" name="option" value="${i}" ${checked}
+               onchange="saveAnswer(${i})">
         ${opt}
       </label><br>
     `;
   });
+
+  updatePalette();
 }
+
+
+
+const SITE_PASSWORD = "mock123";   // 🔐 change this anytime
+
+function enterSite() {
+  document.getElementById("introScreen").classList.add("hiddenScreen");
+  document.getElementById("passwordScreen").classList.remove("hiddenScreen");
+}
+
+function checkPassword() {
+  const entered = document.getElementById("passwordInput").value;
+
+  if (entered === SITE_PASSWORD) {
+    document.getElementById("passwordScreen").classList.add("hiddenScreen");
+    document.getElementById("siteContent").style.display = "block";
+  } else {
+    document.getElementById("passwordError").innerText =
+      "Incorrect password. Please try again.";
+  }
+}
+
 
 function nextQuestion() {
   const selected = document.querySelector('input[name="option"]:checked');
@@ -118,13 +380,8 @@ function nextQuestion() {
     return;
   }
 
-  if (Number(selected.value) === questions[currentIndex].correct) {
-    score++;
-  }
-
-  currentIndex++;
-
-  if (currentIndex < questions.length) {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
     showQuestion();
   } else {
     finishTest();
@@ -132,12 +389,98 @@ function nextQuestion() {
 }
 
 function finishTest() {
-  document.getElementById("quizBox").style.display = "none";
-  document.getElementById("result").innerText =
-    `Test Completed! Score: ${score} / ${questions.length}`;
-  document.querySelector("button").disabled = true;
+  let score = 0;
 
+  answers.forEach((ans, index) => {
+    if (ans !== null && ans === questions[index].correct) {
+      score++;
+    }
+  });
+
+  const percentage = (score / questions.length) * 100;
+
+  document.getElementById("quizBox").style.display = "none";
+  document.getElementById("palette").style.display = "none";
+
+  const card = document.getElementById("resultCard");
+  const circle = document.getElementById("scoreCircle");
+  const verseBox = document.getElementById("bibleVerse");
+
+  card.style.display = "block";
+  circle.innerText = `${score} / ${questions.length}`;
+
+  if (percentage >= 75) {
+    circle.className = "score-circle score-good";
+    verseBox.innerHTML = `
+      “The Lord bless you and keep you;
+      the Lord make His face shine upon you.”
+      <span>— Numbers 6:24–26</span>
+    `;
+  } 
+  else if (percentage >= 25) {
+    circle.className = "score-circle score-average";
+    verseBox.innerHTML = `
+      “Let us not grow weary of doing good,
+      for in due season we shall reap.”
+      <span>— Galatians 6:9</span>
+    `;
+  } 
+  else {
+    circle.className = "score-circle score-poor";
+    verseBox.innerHTML = `
+      “For I know the plans I have for you,
+      plans to give you hope and a future.”
+      <span>— Jeremiah 29:11</span>
+    `;
+  }
+
+  card.scrollIntoView({ behavior: "smooth" });
 }
+
+
+ function buildPalette() {
+  const palette = document.getElementById("palette");
+  palette.innerHTML = "";
+
+  questions.forEach((_, index) => {
+    const btn = document.createElement("button");
+    btn.innerText = index + 1;
+    btn.className = "palette-btn";
+    btn.onclick = () => goToQuestion(index);
+    palette.appendChild(btn);
+  });
+}
+
+  function saveAnswer(optionIndex) {
+  answers[currentIndex] = optionIndex;
+  updatePalette();
+}
+
+function updatePalette() {
+  const buttons = document.querySelectorAll("#palette button");
+
+  buttons.forEach((btn, index) => {
+    btn.classList.remove("palette-answered", "palette-seen", "palette-current");
+
+    if (answers[index] !== null) {
+      btn.classList.add("palette-answered");
+    } else if (visited[index]) {
+      btn.classList.add("palette-seen");
+    }
+
+    if (index === currentIndex) {
+      btn.classList.add("palette-current");
+    }
+  });
+}
+
+  function goToQuestion(index) {
+  currentIndex = index;
+  showQuestion();
+}
+
+
+
 </script>
 
 </body>
