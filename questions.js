@@ -1,23 +1,227 @@
 const questionBank = {
-  "SVD": [
-    {
-      question: "What does SVD stand for?",
-      options: [
-        "Singular Value Decomposition",
-        "System Vector Division",
-        "Signal Variance Detector",
-        "None"
-      ],
-      correct: 0,
-      explanation: "SVD stands for Singular Value Decomposition."
-    },
-    {
-      question: "In SVD, which matrix contains singular values?",
-      options: ["U", "V", "Σ", "A"],
-      correct: 2,
-      explanation: "The diagonal matrix Σ contains the singular values."
-    }
-  ],
+ Bible: [
+  {
+    question: "Who is the first man according to the Bible?",
+    options: [
+      "Noah",
+      "Abraham",
+      "Adam",
+      "Moses"
+    ],
+    correct: 2,
+    explanation: "According to Genesis, Adam is the first man created by God."
+  },
+  {
+    question: "Who built the ark to survive the great flood?",
+    options: [
+      "Moses",
+      "Noah",
+      "David",
+      "Solomon"
+    ],
+    correct: 1,
+    explanation: "God instructed Noah to build the ark to save his family and animals."
+  },
+  {
+    question: "Which book of the Bible begins with the creation of the world?",
+    options: [
+      "Exodus",
+      "Genesis",
+      "Leviticus",
+      "Psalms"
+    ],
+    correct: 1,
+    explanation: "Genesis starts with the account of creation."
+  },
+  {
+    question: "Who led the Israelites out of Egypt?",
+    options: [
+      "Joshua",
+      "Aaron",
+      "Moses",
+      "Joseph"
+    ],
+    correct: 2,
+    explanation: "Moses led the Israelites during the Exodus."
+  },
+  {
+    question: "On which mountain did Moses receive the Ten Commandments?",
+    options: [
+      "Mount Carmel",
+      "Mount Sinai",
+      "Mount Zion",
+      "Mount Nebo"
+    ],
+    correct: 1,
+    explanation: "Moses received the Ten Commandments on Mount Sinai."
+  },
+  {
+    question: "Who was swallowed by a great fish according to the Bible?",
+    options: [
+      "Elijah",
+      "Jonah",
+      "Job",
+      "Daniel"
+    ],
+    correct: 1,
+    explanation: "Jonah was swallowed by a great fish after fleeing from God’s command."
+  },
+  {
+    question: "Who defeated Goliath?",
+    options: [
+      "Saul",
+      "Samuel",
+      "David",
+      "Solomon"
+    ],
+    correct: 2,
+    explanation: "David defeated Goliath with a sling and a stone."
+  },
+  {
+    question: "Which king was known for his wisdom?",
+    options: [
+      "David",
+      "Saul",
+      "Solomon",
+      "Hezekiah"
+    ],
+    correct: 2,
+    explanation: "King Solomon was renowned for his wisdom."
+  },
+  {
+    question: "Who was the first king of Israel?",
+    options: [
+      "David",
+      "Solomon",
+      "Saul",
+      "Samuel"
+    ],
+    correct: 2,
+    explanation: "Saul was anointed as the first king of Israel."
+  },
+  {
+    question: "Which book contains the Psalms?",
+    options: [
+      "Proverbs",
+      "Isaiah",
+      "Psalms",
+      "Ecclesiastes"
+    ],
+    correct: 2,
+    explanation: "The Book of Psalms is a collection of songs and prayers."
+  },
+  {
+    question: "Who is considered the father of many nations?",
+    options: [
+      "Isaac",
+      "Jacob",
+      "Abraham",
+      "Joseph"
+    ],
+    correct: 2,
+    explanation: "God promised Abraham that he would be the father of many nations."
+  },
+  {
+    question: "Who interpreted dreams in Egypt?",
+    options: [
+      "Daniel",
+      "Joseph",
+      "Moses",
+      "Aaron"
+    ],
+    correct: 1,
+    explanation: "Joseph interpreted Pharaoh’s dreams in Egypt."
+  },
+  {
+    question: "Which prophet was taken to heaven in a chariot of fire?",
+    options: [
+      "Elijah",
+      "Elisha",
+      "Isaiah",
+      "Jeremiah"
+    ],
+    correct: 0,
+    explanation: "Elijah was taken up to heaven in a chariot of fire."
+  },
+  {
+    question: "Who wrote most of the Proverbs?",
+    options: [
+      "David",
+      "Solomon",
+      "Moses",
+      "Samuel"
+    ],
+    correct: 1,
+    explanation: "Many Proverbs are attributed to King Solomon."
+  },
+  {
+    question: "Who was thrown into the lions’ den?",
+    options: [
+      "Joseph",
+      "Jeremiah",
+      "Daniel",
+      "Ezekiel"
+    ],
+    correct: 2,
+    explanation: "Daniel was thrown into the lions’ den for praying to God."
+  },
+  {
+    question: "Who betrayed Jesus?",
+    options: [
+      "Peter",
+      "John",
+      "Judas Iscariot",
+      "Thomas"
+    ],
+    correct: 2,
+    explanation: "Judas Iscariot betrayed Jesus for thirty pieces of silver."
+  },
+  {
+    question: "Where was Jesus born?",
+    options: [
+      "Nazareth",
+      "Jerusalem",
+      "Bethlehem",
+      "Galilee"
+    ],
+    correct: 2,
+    explanation: "Jesus was born in Bethlehem."
+  },
+  {
+    question: "Who baptized Jesus?",
+    options: [
+      "Peter",
+      "John the Baptist",
+      "Paul",
+      "James"
+    ],
+    correct: 1,
+    explanation: "John the Baptist baptized Jesus in the Jordan River."
+  },
+  {
+    question: "Which disciple denied Jesus three times?",
+    options: [
+      "John",
+      "Peter",
+      "Andrew",
+      "Philip"
+    ],
+    correct: 1,
+    explanation: "Peter denied Jesus three times before the rooster crowed."
+  },
+  {
+    question: "Which book is the last book of the Bible?",
+    options: [
+      "Jude",
+      "Hebrews",
+      "Revelation",
+      "Acts"
+    ],
+    correct: 2,
+    explanation: "Revelation is the final book of the Bible."
+  }
+]
+,
 "CS_and_CG_MOSFET_Small_Signal": [
   {
     question: "Why is small-signal analysis used in MOSFET amplifiers?",
