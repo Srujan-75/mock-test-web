@@ -391,7 +391,15 @@ function nextQuestion() {
     finishTest();
   }
 }
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    showQuestion();
+  }
+}
 
+  
+  
 function finishTest() {
   let score = 0;
 
