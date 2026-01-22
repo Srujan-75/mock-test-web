@@ -83,6 +83,7 @@ select {
   margin-bottom: 15px;
 }
 
+
 .introCard h2 {
   margin-bottom: 10px;
 }
@@ -244,24 +245,25 @@ blockquote span {
 
 <div id="passwordScreen" class="hiddenScreen">
 
-  <div class="introCard">
-    <h2>Enter Access Password</h2>
+<div class="introCard">
+  <h2>Login Required</h2>
+  <p>Please sign in using Google to continue</p>
 
-    <p style="margin-bottom:15px;">
-      This test is intended for authorized students only.
-    </p>
+  <button onclick="googleLogin()">Login with Google</button>
 
-    <input type="password" id="passwordInput" placeholder="Password">
+  <p id="loginError" style="color:red;"></p>
+</div>
 
-    <br><br>
-
-    <button onclick="checkPassword()">Continue</button>
-
-    <p id="passwordError" style="color:red; margin-top:10px;"></p>
-  </div>
 </div>
 
 <div id="siteContent" style="display:none;">
+
+  <div style="text-align:right; margin-bottom:10px;">
+  <button onclick="logout()" style="background:#dc3545;">
+    Logout
+  </button>
+</div>
+
 
 <div class="introCard" style="max-width:900px; margin:auto;">
 <h1>Test Platform</h1>
@@ -271,6 +273,14 @@ blockquote span {
   <option value="Bible">Bible</option>
   <option value="CS_and_CG_MOSFET_Small_Signal">CS_and_CG_MOSFET_Small_Signal</option>
 </select>
+  
+<button onclick="showResults()" style="margin-top:10px;">
+  View Results
+</button>
+
+<button onclick="retestTopic()" style="margin-top:10px; background:#28a745;">
+  Retest
+</button>
 
 
 <div style="display:flex; gap:20px; justify-content:center;">
@@ -303,7 +313,45 @@ blockquote span {
 
 </div>
 <script src="questions.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+
 <script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDBE1w09eYl78VrNZPq65Hyp8sQ4P5KTqE",
+  authDomain: "mock-test-4ac5d.firebaseapp.com",
+  projectId: "mock-test-4ac5d",
+  appId: "1:704532603753:web:a699e6ac03b2277a7153f8"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+
+  auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = {
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email
+    };
+
+    // Hide intro & login screens
+    document.getElementById("introScreen").classList.add("hiddenScreen");
+    document.getElementById("passwordScreen").classList.add("hiddenScreen");
+
+    // Show main site
+    document.getElementById("siteContent").style.display = "block";
+
+    console.log("Auto-login:", user.email);
+  }
+});
+
 
 let answers = [];       // stores selected option index or null
 let visited = [];       // true if question was opened
@@ -316,6 +364,9 @@ function startTest() {
   const topic = document.getElementById("topicSelect").value;
   if (!topic) return;
 
+  // ✅ HIDE OLD RESULTS WHEN NEW TEST STARTS
+  document.getElementById("resultCard").style.display = "none";
+
   questions = questionBank[topic];
   currentIndex = 0;
   score = 0;
@@ -324,11 +375,11 @@ function startTest() {
   visited = new Array(questions.length).fill(false);
 
   document.getElementById("quizBox").style.display = "block";
- 
 
   buildPalette();
   showQuestion();
 }
+
 
 function showQuestion() {
   visited[currentIndex] = true;
@@ -409,44 +460,47 @@ function finishTest() {
     }
   });
 
-  const percentage = (score / questions.length) * 100;
+  const topic = document.getElementById("topicSelect").value;
 
+  // 🔥 SAVE RESULT TO FIRESTORE (SILENTLY)
+  const userRef = db.collection("users").doc(currentUser.uid);
+
+  userRef.get().then(doc => {
+    let data;
+
+    if (doc.exists) {
+      data = doc.data();
+    } else {
+      data = {
+        name: currentUser.name,
+        email: currentUser.email,
+        attempts: 0,
+        bestScore: 0,
+        history: []
+      };
+    }
+
+    data.attempts += 1;
+
+    if (score > data.bestScore) {
+      data.bestScore = score;
+    }
+
+    data.history.push({
+      topic: topic,
+      score: score,
+      total: questions.length,
+      time: new Date().toLocaleString()
+    });
+
+    userRef.set(data);
+  });
+
+  // ✅ END EXAM MODE (NO RESULTS SHOWN)
   document.getElementById("quizBox").style.display = "none";
   document.getElementById("palette").style.display = "none";
 
-  const card = document.getElementById("resultCard");
-  const circle = document.getElementById("scoreCircle");
-  const verseBox = document.getElementById("bibleVerse");
-
-  card.style.display = "block";
-  circle.innerText = `${score} / ${questions.length}`;
-
-  if (percentage >= 75) {
-    circle.className = "score-circle score-good";
-    verseBox.innerHTML = `
-      “The Lord bless you and keep you;
-      the Lord make His face shine upon you.”
-      <span>— Numbers 6:24–26</span>
-    `;
-  } 
-  else if (percentage >= 25) {
-    circle.className = "score-circle score-average";
-    verseBox.innerHTML = `
-      “Let us not grow weary of doing good,
-      for in due season we shall reap.”
-      <span>— Galatians 6:9</span>
-    `;
-  } 
-  else {
-    circle.className = "score-circle score-poor";
-    verseBox.innerHTML = `
-      “For I know the plans I have for you,
-      plans to give you hope and a future.”
-      <span>— Jeremiah 29:11</span>
-    `;
-  }
-
-  card.scrollIntoView({ behavior: "smooth" });
+  alert("Test submitted successfully. Click 'View Results' to see your score.");
 }
 
 
@@ -491,6 +545,158 @@ function updatePalette() {
   showQuestion();
 }
 
+
+
+function googleLogin() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  auth.signInWithPopup(provider)
+    .then(result => {
+      const user = result.user;
+
+      currentUser = {
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email
+      };
+
+      document.getElementById("passwordScreen").classList.add("hiddenScreen");
+      document.getElementById("siteContent").style.display = "block";
+
+      alert(`Welcome ${user.displayName}`);
+    })
+    .catch(error => {
+      document.getElementById("loginError").innerText = error.message;
+    });
+}
+
+
+  function retestTopic() {
+  const topic = document.getElementById("topicSelect").value;
+
+  if (!topic) {
+    alert("Please select a topic first");
+    return;
+  }
+
+  // Hide results
+  document.getElementById("resultCard").style.display = "none";
+
+  // Restart test (reuse existing logic)
+  startTest();
+}
+
+  function showResults() {
+  const topic = document.getElementById("topicSelect").value;
+
+  if (!topic) {
+    alert("Please select a topic to view results");
+    return;
+  }
+
+  const userRef = db.collection("users").doc(currentUser.uid);
+
+  userRef.get().then(doc => {
+    if (!doc.exists) {
+      alert("No results found");
+      return;
+    }
+
+    const data = doc.data();
+    const attempts = data.history.filter(h => h.topic === topic);
+
+    if (attempts.length === 0) {
+      alert("No attempts for this topic yet");
+      return;
+    }
+
+    // 🔵 Latest attempt
+    const latest = attempts[attempts.length - 1];
+    const percentage = (latest.score / latest.total) * 100;
+
+    const card = document.getElementById("resultCard");
+    const circle = document.getElementById("scoreCircle");
+    const verseBox = document.getElementById("bibleVerse");
+
+    card.style.display = "block";
+    circle.innerText = `${latest.score} / ${latest.total}`;
+
+    if (percentage >= 75) {
+      circle.className = "score-circle score-good";
+      verseBox.innerHTML = `
+        “Thanks be to God, who gives us the victory through our Lord Jesus Christ”
+        <span>— 1 Corinthians 15:57</span>
+      `;
+    }
+    else if (percentage >= 25) {
+      circle.className = "score-circle score-average";
+      verseBox.innerHTML = `
+        “The horse is made ready for the day of battle, but victory belongs to the LORD”
+        <span>— Proverbs 21:31</span>
+      `;
+    }
+    else {
+      circle.className = "score-circle score-poor";
+      verseBox.innerHTML = `
+        “Though your beginning was small, your latter end will greatly increase”
+        <span>— Job 8:7</span>
+      `;
+    }
+
+    // 📊 History Table
+    let tableHTML = `
+      <h3 style="margin-top:30px;">Previous Attempts (${topic})</h3>
+      <table style="width:100%; border-collapse:collapse;">
+        <tr style="background:#f2f2f2;">
+          <th style="border:1px solid #ccc; padding:8px;">Attempt</th>
+          <th style="border:1px solid #ccc; padding:8px;">Score</th>
+          <th style="border:1px solid #ccc; padding:8px;">Date & Time</th>
+        </tr>
+    `;
+
+    attempts.forEach((a, index) => {
+      tableHTML += `
+        <tr>
+          <td style="border:1px solid #ccc; padding:8px;">${index + 1}</td>
+          <td style="border:1px solid #ccc; padding:8px;">
+            ${a.score} / ${a.total}
+          </td>
+          <td style="border:1px solid #ccc; padding:8px;">
+            ${a.time}
+          </td>
+        </tr>
+      `;
+    });
+
+    tableHTML += `</table>`;
+
+    verseBox.innerHTML += tableHTML;
+
+    card.scrollIntoView({ behavior: "smooth" });
+  });
+}
+function logout() {
+  auth.signOut().then(() => {
+
+    // Clear user state
+    currentUser = null;
+
+    // Reset UI
+    document.getElementById("siteContent").style.display = "none";
+    document.getElementById("quizBox").style.display = "none";
+    document.getElementById("palette").style.display = "none";
+    document.getElementById("resultCard").style.display = "none";
+
+    // Reset selections
+    document.getElementById("topicSelect").selectedIndex = 0;
+
+    // Show welcome screen again
+    document.getElementById("introScreen").classList.remove("hiddenScreen");
+    document.getElementById("passwordScreen").classList.add("hiddenScreen");
+
+    alert("You have been logged out successfully.");
+  });
+}
 
 
 </script>
