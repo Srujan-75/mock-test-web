@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+i have a website with :<!DOCTYPE html>
 <html>
 <head>
   <title>Mock Test Platform</title>
@@ -243,7 +243,7 @@ blockquote span {
   </div>
 </div>
 
-
+<div id="passwordScreen" class="hiddenScreen">
 
 <div class="introCard">
   <h2>Login Required</h2>
@@ -309,12 +309,6 @@ blockquote span {
   <div id="scoreCircle" class="score-circle"></div>
 
   <div id="bibleVerse" class="verse"></div>
-    <button onclick="showDetailedAnswers()" style="margin-top:20px; background:#6f42c1;">
-  View Detailed Answers
-</button>
-
-<div id="detailedAnswers" style="margin-top:20px; text-align:left;"></div>
-
 </div>
 
 </div>
@@ -703,31 +697,6 @@ function logout() {
     alert("You have been logged out successfully.");
   });
 }
-function showDetailedAnswers() {
-  const container = document.getElementById("detailedAnswers");
-  container.innerHTML = "<h3>Detailed Answer Review</h3>";
-
-  questions.forEach((q, index) => {
-    const userAnsIndex = answers[index];
-    const correctIndex = q.correct;
-
-    const userAnswer = userAnsIndex !== null ? q.options[userAnsIndex] : "Not Attempted";
-    const correctAnswer = q.options[correctIndex];
-
-    const isCorrect = userAnsIndex === correctIndex;
-
-    container.innerHTML += `
-      <div style="margin-bottom:20px; padding:15px; border-radius:10px; background:#f9f9f9; border-left:6px solid ${isCorrect ? '#2ecc71' : '#e74c3c'};">
-        <b>Q${index + 1}: ${q.question}</b><br><br>
-        <b>Your Answer:</b> ${userAnswer} <br>
-        <b>Correct Answer:</b> ${correctAnswer} <br><br>
-        <b>Explanation:</b> ${q.explanation || "No explanation provided."}
-      </div>
-    `;
-  });
-
-  container.scrollIntoView({ behavior: "smooth" });
-}
 
 
 </script>
@@ -735,4 +704,4 @@ function showDetailedAnswers() {
 </body>
 
 
-</html>
+</html> ,now i want to add a button which shows detailed answer for every question after attempting the test
