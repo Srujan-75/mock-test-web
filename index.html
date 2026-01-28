@@ -257,7 +257,9 @@ blockquote span {
   <option value="" selected disabled>-- Select Topic --</option>
   <option value="Bible">Bible</option>
   <option value="CS_and_CG_MOSFET_Small_Signal">CS_and_CG_MOSFET_Small_Signal</option>
+  <option value="AI_Generated">AI Generated Quiz</option>
 </select>
+
   
 <button onclick="showResults()" style="margin-top:10px;">
   View Results
@@ -777,7 +779,37 @@ function closeReview() {
   document.getElementById("palette").style.display = "grid";
 }
 
-  
+  async function generateQuizAI() {
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert("Please login first");
+    return;
+  }
+
+  const token = await user.getIdToken(true);
+
+  const response = await fetch("/api/generateQuiz", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      topic: "General Engineering",
+      difficulty: "medium",
+      count: 5
+    })
+  });
+
+  if (response.status === 429) {
+    alert("Daily AI limit reached");
+    return;
+  }
+
+  const data = await response.json();
+  console.log("AI Questions:", data);
+}
+
 </script>
 
 </body>
