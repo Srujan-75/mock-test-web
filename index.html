@@ -15,7 +15,7 @@ body {
 
 body::before {
   content: "";
-  position: fixed;
+  position: center;
   inset: 0;
   background: rgba(0, 0, 0, 0.25);
   z-index: -1;
@@ -224,7 +224,7 @@ blockquote span {
       <br><span>— Proverbs 18:15</span>
     </blockquote>
 
-    <button onclick="enterSite()">Start Test</button>
+    <button onclick="enterSite()">Let's Go</button>
   </div>
 </div>
 
@@ -297,6 +297,9 @@ blockquote span {
     <button onclick="showDetailedAnswers()" style="margin-top:20px; background:#6f42c1;">
   View Detailed Answers
 </button>
+<button onclick="closeReview()" style="margin-top:20px; background:#6f42c2;">
+  Close Review
+</button>
 
 <div id="detailedAnswers" style="margin-top:20px; text-align:left;"></div>
 
@@ -311,6 +314,8 @@ blockquote span {
 
 
 <script>
+let reviewTopic = null;   // Stores topic currently in review mode
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyDBE1w09eYl78VrNZPq65Hyp8sQ4P5KTqE",
@@ -351,11 +356,18 @@ let currentIndex = 0;
 let score = 0;
 
 function startTest() {
+
   const topic = document.getElementById("topicSelect").value;
   if (!topic) return;
 
-  // ✅ HIDE OLD RESULTS WHEN NEW TEST STARTS
+  // 🚫 Block ONLY if same topic is under review
+  if (reviewTopic === topic) {
+    alert("Close detailed answers before retaking this topic.");
+    return;
+  }
+
   document.getElementById("resultCard").style.display = "none";
+  document.getElementById("detailedAnswers").innerHTML = "";
 
   questions = questionBank[topic];
   currentIndex = 0;
@@ -365,12 +377,12 @@ function startTest() {
   visited = new Array(questions.length).fill(false);
 
   document.getElementById("quizBox").style.display = "block";
-
   document.getElementById("palette").style.display = "grid";
 
   buildPalette();
   showQuestion();
 }
+
 
 
 function showQuestion() {
@@ -399,6 +411,8 @@ function showQuestion() {
 
 
 function nextQuestion() {
+ if (reviewTopic === document.getElementById("topicSelect").value) return;
+
   const selected = document.querySelector('input[name="option"]:checked');
 
   if (!selected) {
@@ -414,6 +428,8 @@ function nextQuestion() {
   }
 }
 function prevQuestion() {
+  if (reviewTopic === document.getElementById("topicSelect").value) return;
+
   if (currentIndex > 0) {
     currentIndex--;
     showQuestion();
@@ -474,7 +490,7 @@ if (!currentUser) {
   // ✅ END EXAM MODE (NO RESULTS SHOWN)
   document.getElementById("quizBox").style.display = "none";
   document.getElementById("palette").style.display = "none";
-
+  
   alert("Test submitted successfully. Click 'View Results' to see your score.");
 }
 
@@ -535,7 +551,8 @@ function googleLogin() {
         email: user.email
       };
 
-      document.getElementById("passwordScreen").classList.add("hiddenScreen");
+     document.getElementById("loginScreen").classList.add("hiddenScreen");
+
       document.getElementById("siteContent").style.display = "block";
 
       alert(`Welcome ${user.displayName}`);
@@ -546,20 +563,24 @@ function googleLogin() {
 }
 
 
-  function retestTopic() {
-  const topic = document.getElementById("topicSelect").value;
+ function retestTopic() {
 
+  const topic = document.getElementById("topicSelect").value;
   if (!topic) {
     alert("Please select a topic first");
     return;
   }
 
-  // Hide results
-  document.getElementById("resultCard").style.display = "none";
+  // If this topic is under review, close review mode first
+  if (reviewTopic === topic) {
+    reviewTopic = null;
+    document.getElementById("detailedAnswers").innerHTML = "";
+  }
 
-  // Restart test (reuse existing logic)
+  document.getElementById("resultCard").style.display = "none";
   startTest();
 }
+
 
   function showResults() {
     if (!currentUser) {
@@ -672,36 +693,88 @@ function logout() {
 
     // Show welcome screen again
     document.getElementById("introScreen").classList.remove("hiddenScreen");
-    document.getElementById("passwordScreen").classList.add("hiddenScreen");
+   document.getElementById("loginScreen").classList.add("hiddenScreen");
+
 
     alert("You have been logged out successfully.");
   });
 }
 
 function showDetailedAnswers() {
-  const container = document.getElementById("detailedAnswers");
-  container.innerHTML = "<h3>Detailed Answer Review</h3>";
 
-  questions.forEach((q, index) => {
-    const userAnsIndex = answers[index];
-    const correctIndex = q.correct;
+  const topic = document.getElementById("topicSelect").value;
+  if (!topic) {
+    alert("Please select a topic first.");
+    return;
+  }
 
-    const userAnswer = userAnsIndex !== null ? q.options[userAnsIndex] : "Not Attempted";
-    const correctAnswer = q.options[correctIndex];
+  if (!currentUser) {
+    alert("Please login first.");
+    return;
+  }
 
-    const isCorrect = userAnsIndex === correctIndex;
+  const userRef = db.collection("users").doc(currentUser.uid);
 
-    container.innerHTML += `
-      <div style="margin-bottom:20px; padding:15px; border-radius:10px; background:#f9f9f9; border-left:6px solid ${isCorrect ? '#2ecc71' : '#e74c3c'};">
-        <b>Q${index + 1}: ${q.question}</b><br><br>
-        <b>Your Answer:</b> ${userAnswer} <br>
-        <b>Correct Answer:</b> ${correctAnswer} <br><br>
-        <b>Explanation:</b> ${q.explanation || "No explanation provided."}
-      </div>
-    `;
+  userRef.get().then(doc => {
+    if (!doc.exists) {
+      alert("You have not attempted this test yet.");
+      return;
+    }
+
+    const data = doc.data();
+    const attempts = data.history.filter(h => h.topic === topic);
+
+    if (attempts.length === 0) {
+      alert("You must attempt this topic at least once before viewing detailed answers.");
+      return;
+    }
+
+    // 🔒 Enable review mode for THIS topic
+    reviewTopic = topic;
+
+    document.getElementById("quizBox").style.display = "none";
+    document.getElementById("palette").style.display = "none";
+
+    const container = document.getElementById("detailedAnswers");
+    container.innerHTML = "<h3>Detailed Answer Review</h3>";
+
+    if (!questions.length) {
+  questions = questionBank[topic];
+}
+
+    questions.forEach((q, index) => {
+      const userAnsIndex = answers[index];
+      const correctIndex = q.correct;
+
+      const userAnswer = userAnsIndex !== null ? q.options[userAnsIndex] : "Not Attempted";
+      const correctAnswer = q.options[correctIndex];
+      const isCorrect = userAnsIndex === correctIndex;
+
+      container.innerHTML += `
+        <div style="margin-bottom:20px; padding:15px; border-radius:10px; background:#f9f9f9; border-left:6px solid ${isCorrect ? '#2ecc71' : '#e74c3c'};">
+          <b>Q${index + 1}: ${q.question}</b><br><br>
+          <b>Your Answer:</b> ${userAnswer} <br>
+          <b>Correct Answer:</b> ${correctAnswer} <br><br>
+          <b>Explanation:</b> ${q.explanation || "No explanation provided."}
+        </div>
+      `;
+    });
+
+    container.scrollIntoView({ behavior: "smooth" });
   });
+}
 
-  container.scrollIntoView({ behavior: "smooth" });
+
+
+
+function enterSite() {
+  document.getElementById("introScreen").classList.add("hiddenScreen");
+  document.getElementById("loginScreen").classList.remove("hiddenScreen");
+}
+function closeReview() {
+  reviewMode = false;
+  document.getElementById("detailedAnswers").innerHTML = "";
+  document.getElementById("palette").style.display = "grid";
 }
 
   
