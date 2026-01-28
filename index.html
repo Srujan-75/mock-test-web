@@ -368,6 +368,10 @@ function startTest() {
   const topic = document.getElementById("topicSelect").value;
   if (!topic) return;
 
+    if (topic === "AI_Generated") {
+    generateQuizAI();
+    return;
+      
   // 🚫 Block ONLY if same topic is under review
   if (reviewTopic === topic) {
     alert("Close detailed answers before retaking this topic.");
@@ -785,35 +789,77 @@ function closeReview() {
   document.getElementById("palette").style.display = "grid";
 }
 
-  async function generateQuizAI() {
-  const user = firebase.auth().currentUser;
-  if (!user) {
-    alert("Please login first");
-    return;
+ async function generateQuizAI() {
+  try {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+      alert("Please login first");
+      return;
+    }
+
+    alert("Generating AI quiz... please wait");
+
+    const token = await user.getIdToken(true);
+
+    const response = await fetch("/api/generateQuiz", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        topic: "General Engineering",
+        difficulty: "medium",
+        count: 5
+      })
+    });
+
+    if (response.status === 429) {
+      alert("Daily AI limit reached");
+      return;
+    }
+
+    const data = await response.json();
+
+    // Gemini text output
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("Invalid AI response");
+
+    // Split questions
+    const rawQuestions = text.split("\n\n").filter(q => q.includes("?"));
+
+    questions = rawQuestions.map(q => {
+      const lines = q.split("\n").filter(l => l.trim() !== "");
+
+      const question = lines[0];
+      const options = lines.slice(1, 5).map(o => o.replace(/^[A-D]\)|^[A-D]\./, "").trim());
+      const correctLetter = lines.find(l => l.toLowerCase().includes("answer"))?.match(/[A-D]/i)?.[0];
+
+      const correctIndex = correctLetter ? ["A","B","C","D"].indexOf(correctLetter.toUpperCase()) : 0;
+
+      return {
+        question,
+        options,
+        correct: correctIndex,
+        explanation: "AI Generated Question"
+      };
+    });
+
+    // Initialize quiz state
+    currentIndex = 0;
+    answers = new Array(questions.length).fill(null);
+    visited = new Array(questions.length).fill(false);
+
+    document.getElementById("quizBox").style.display = "block";
+    document.getElementById("palette").style.display = "grid";
+
+    buildPalette();
+    showQuestion();
+
+  } catch (err) {
+    console.error(err);
+    alert("Error generating AI quiz");
   }
-
-  const token = await user.getIdToken(true);
-
-  const response = await fetch("/api/generateQuiz", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({
-      topic: "General Engineering",
-      difficulty: "medium",
-      count: 5
-    })
-  });
-
-  if (response.status === 429) {
-    alert("Daily AI limit reached");
-    return;
-  }
-
-  const data = await response.json();
-  console.log("AI Questions:", data);
 }
 
 </script>
