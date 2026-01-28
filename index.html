@@ -109,23 +109,8 @@ blockquote span {
   padding: 30px;
 }
 
-/* 🔐 Password Screen */
-#passwordScreen {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-#passwordScreen input {
-  padding: 10px;
-  width: 220px;
-  font-size: 16px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  outline: none;
-  text-align: center;
-}
+
 
 .hiddenScreen {
   display: none !important;
@@ -243,18 +228,18 @@ blockquote span {
   </div>
 </div>
 
-<div id="passwordScreen" class="hiddenScreen">
 
-<div class="introCard">
-  <h2>Login Required</h2>
-  <p>Please sign in using Google to continue</p>
 
-  <button onclick="googleLogin()">Login with Google</button>
-
-  <p id="loginError" style="color:red;"></p>
+<div id="loginScreen" class="hiddenScreen">
+  <div class="introCard">
+    <h2>Login Required</h2>
+    <p>Please sign in using Google to continue</p>
+    <button onclick="googleLogin()">Login with Google</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
 </div>
 
-</div>
+
 
 <div id="siteContent" style="display:none;">
 
@@ -342,11 +327,10 @@ let currentUser = null;
     };
 
     // Hide intro & login screens
-    document.getElementById("introScreen").classList.add("hiddenScreen");
-    document.getElementById("passwordScreen").classList.add("hiddenScreen");
+document.getElementById("introScreen").classList.add("hiddenScreen");
+document.getElementById("loginScreen").classList.add("hiddenScreen");
+document.getElementById("siteContent").style.display = "block";
 
-    // Show main site
-    document.getElementById("siteContent").style.display = "block";
 
     console.log("Auto-login:", user.email);
   }
@@ -375,6 +359,8 @@ function startTest() {
   visited = new Array(questions.length).fill(false);
 
   document.getElementById("quizBox").style.display = "block";
+
+  document.getElementById("palette").style.display = "grid";
 
   buildPalette();
   showQuestion();
@@ -406,27 +392,6 @@ function showQuestion() {
 }
 
 
-
-const SITE_PASSWORD = "Jesus is my Saviour";   // 🔐 change this anytime
-
-function enterSite() {
-  document.getElementById("introScreen").classList.add("hiddenScreen");
-  document.getElementById("passwordScreen").classList.remove("hiddenScreen");
-}
-
-function checkPassword() {
-  const entered = document.getElementById("passwordInput").value;
-
-  if (entered === SITE_PASSWORD) {
-    document.getElementById("passwordScreen").classList.add("hiddenScreen");
-    document.getElementById("siteContent").style.display = "block";
-  } else {
-    document.getElementById("passwordError").innerText =
-      "Incorrect password. Please try again.";
-  }
-}
-
-
 function nextQuestion() {
   const selected = document.querySelector('input[name="option"]:checked');
 
@@ -453,6 +418,10 @@ function prevQuestion() {
   
 function finishTest() {
   let score = 0;
+if (!currentUser) {
+  alert("Please login first");
+  return;
+}
 
   answers.forEach((ans, index) => {
     if (ans !== null && ans === questions[index].correct) {
@@ -587,6 +556,11 @@ function googleLogin() {
 }
 
   function showResults() {
+    if (!currentUser) {
+  alert("Please login first");
+  return;
+}
+
   const topic = document.getElementById("topicSelect").value;
 
   if (!topic) {
